@@ -19,15 +19,15 @@ import { OrganisationMember } from "@mongoose/schemas/OrganisationMember";
 
 const router = Router();
 
-router.get<"/getAll", {}, OrganisationMembersGetAllRes, Partial<OrganisationMembersGetAllReq>>(
+router.get<"/getAll", {}, OrganisationMembersGetAllRes, {}, Partial<OrganisationMembersGetAllReq>>(
   "/getAll",
   async (req, res) => {
     try {
       if (!req.user) return unauthorizedError()(res);
 
-      const { organisationId } = req.body;
+      const { organisationId } = req.query;
 
-      const validators = organisationValidators.membersGetAll(req.body);
+      const validators = organisationValidators.membersGetAll(req.query);
 
       let validation = parseValidators(validators);
       if (validation.failed || !organisationId) return validationError(validation)(res);

@@ -17,15 +17,15 @@ import { OrganisationMember } from "@mongoose/schemas/OrganisationMember";
 
 const router = Router();
 
-router.delete<"/delete", {}, OrganisationDeleteRes, Partial<OrganisationDeleteReq>>(
+router.delete<"/delete", {}, OrganisationDeleteRes, {}, Partial<OrganisationDeleteReq>>(
   "/delete",
   async (req, res) => {
     try {
       if (!req.user) return unauthorizedError()(res);
 
-      const { organisationId } = req.body;
+      const { organisationId } = req.query;
 
-      const validators = organisationValidators.delete(req.body);
+      const validators = organisationValidators.delete(req.query);
 
       let validation = parseValidators(validators);
       if (validation.failed || !organisationId) return validationError(validation)(res);

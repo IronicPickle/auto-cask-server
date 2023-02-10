@@ -7,11 +7,11 @@ import { User } from "@mongoose/schemas/User";
 
 const router = Router();
 
-router.get<"/get", {}, UserGetRes, Partial<UserGetReq>>("/get", async (req, res) => {
+router.get<"/get", {}, UserGetRes, {}, Partial<UserGetReq>>("/get", async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId } = req.query;
 
-    const validators = userValidators.get(req.body);
+    const validators = userValidators.get(req.query);
 
     let validation = parseValidators(validators);
     if (validation.failed || !userId) return validationError(validation)(res);

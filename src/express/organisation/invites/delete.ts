@@ -13,51 +13,53 @@ import {
   OrganisationInvitesDeleteReq,
   OrganisationInvitesDeleteRes,
 } from "@shared/ts/api/organisation";
-import OrganisationPermissionChecker from "@shared/permissionCheckers/organisationPermissionChecker";
 import { OrganisationInvite } from "@mongoose/schemas/OrganisationInvite";
 import OrganisationPermissionCheckerBE from "@lib/utils/PermissionCheckerBE";
 
 const router = Router();
 
-router.delete<"/delete", {}, OrganisationInvitesDeleteRes, Partial<OrganisationInvitesDeleteReq>>(
+router.delete<
   "/delete",
-  async (req, res) => {
-    try {
-      if (!req.user) return unauthorizedError()(res);
+  {},
+  OrganisationInvitesDeleteRes,
+  {},
+  Partial<OrganisationInvitesDeleteReq>
+>("/delete", async (req, res) => {
+  try {
+    if (!req.user) return unauthorizedError()(res);
 
-      const { inviteId } = req.body;
+    const { inviteId } = req.query;
 
-      const validators = organisationValidators.invitesDelete(req.body);
+    const validators = organisationValidators.invitesDelete(req.query);
 
-      let validation = parseValidators(validators);
-      if (validation.failed || !inviteId) return validationError(validation)(res);
+    let validation = parseValidators(validators);
+    if (validation.failed || !inviteId) return validationError(validation)(res);
 
-      const invite = await OrganisationInvite.findById(inviteId).populate([
-        {
-          path: "user",
-          select: "displayName createdOn",
-        },
-        {
-          path: "organisation",
-          select: "name createdOn",
-        },
-      ]);
+    const invite = await OrganisationInvite.findById(inviteId).populate([
+      {
+        path: "user",
+        select: "displayName createdOn",
+      },
+      {
+        path: "organisation",
+        select: "name createdOn",
+      },
+    ]);
 
-      if (!invite) return notFoundError("No invite exists with that id")(res);
+    if (!invite) return notFoundError("No invite exists with that id")(res);
 
-      const permissionChecker = await OrganisationPermissionCheckerBE.from(invite.organisation.id);
+    const permissionChecker = await OrganisationPermissionCheckerBE.from(invite.organisation.id);
 
-      if (!permissionChecker.canDeleteInvites(req.user.id))
-        return forbiddenError("You cannot delete invites in this organisation")(res);
+    if (!permissionChecker.canDeleteInvites(req.user.id))
+      return forbiddenError("You cannot delete invites in this organisation")(res);
 
-      await invite.delete();
+    await invite.delete();
 
-      ok(invite)(res);
-    } catch (err) {
-      console.error(err);
-      error("Something went wrong.")(res);
-    }
-  },
-);
+    ok(invite)(res);
+  } catch (err) {
+    console.error(err);
+    error("Something went wrong.")(res);
+  }
+});
 
 export default router;

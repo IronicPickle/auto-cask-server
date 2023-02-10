@@ -6,7 +6,6 @@ import register from "./auth/register";
 import jwt from "jsonwebtoken";
 import { isString } from "@shared/utils/generic";
 import { User } from "@mongoose/schemas/User";
-import dayjs from "dayjs";
 import { ok } from "@shared/utils/api";
 import refresh from "./auth/refresh";
 import organisationCreate from "./organisation/create";
@@ -23,6 +22,7 @@ import organisationInvitesAccept from "./organisation/invites/accept";
 import organisationInvitesGetAll from "./organisation/invites/getAll";
 import userGet from "./user/get";
 import userGetSelf from "./user/getSelf";
+import userGetMemberships from "./user/getMemberships";
 
 export const expressServer = express();
 
@@ -105,4 +105,5 @@ export default () => {
 
   expressServer.use("/user", userGet);
   expressServer.use("/user", userGetSelf);
+  expressServer.use("/user", userGetMemberships);
 };

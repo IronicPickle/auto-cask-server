@@ -12,7 +12,6 @@ import {
   OrganisationInvitesGetAllRes,
 } from "@shared/ts/api/organisation";
 import { Organisation } from "@mongoose/schemas/Organisation";
-import OrganisationPermissionChecker from "@shared/permissionCheckers/organisationPermissionChecker";
 import { OrganisationInvite } from "@mongoose/schemas/OrganisationInvite";
 import OrganisationPermissionCheckerBE from "@lib/utils/PermissionCheckerBE";
 import organisationValidators from "@shared/validators/organisationValidators";
@@ -20,15 +19,15 @@ import { parseValidators } from "@src/../../auto-cask-shared/utils/generic";
 
 const router = Router();
 
-router.get<"/getAll", {}, OrganisationInvitesGetAllRes, Partial<OrganisationInvitesGetAllReq>>(
+router.get<"/getAll", {}, OrganisationInvitesGetAllRes, {}, Partial<OrganisationInvitesGetAllReq>>(
   "/getAll",
   async (req, res) => {
     try {
       if (!req.user) return unauthorizedError()(res);
 
-      const { organisationId } = req.body;
+      const { organisationId } = req.query;
 
-      const validators = organisationValidators.invitesGetAll(req.body);
+      const validators = organisationValidators.invitesGetAll(req.query);
 
       let validation = parseValidators(validators);
       if (validation.failed || !organisationId) return validationError(validation)(res);

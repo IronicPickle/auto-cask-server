@@ -15,15 +15,15 @@ import OrganisationPermissionCheckerBE from "@lib/utils/PermissionCheckerBE";
 
 const router = Router();
 
-router.get<"/get", {}, OrganisationGetRes, Partial<OrganisationGetReq>>(
+router.get<"/get", {}, OrganisationGetRes, {}, Partial<OrganisationGetReq>>(
   "/get",
   async (req, res) => {
     try {
       if (!req.user) return unauthorizedError()(res);
 
-      const { organisationId } = req.body;
+      const { organisationId } = req.query;
 
-      const validators = organisationValidators.get(req.body);
+      const validators = organisationValidators.get(req.query);
 
       let validation = parseValidators(validators);
       if (validation.failed || !organisationId) return validationError(validation)(res);

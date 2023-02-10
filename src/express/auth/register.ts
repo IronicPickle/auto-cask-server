@@ -22,7 +22,7 @@ router.post<"/register", {}, RegisterRes, Partial<RegisterReq>>("/register", asy
     );
 
     validators.email.custom(() =>
-      preExistingUser ? "An accout already exists with that email" : undefined,
+      preExistingUser ? "An account already exists with that email" : undefined,
     );
     const validation = parseValidators(validators);
 
