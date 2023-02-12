@@ -6,10 +6,10 @@ const schema = new Schema({
     ref: "Organisation",
     required: true,
   },
-  user: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
+  email: {
+    type: String,
     required: true,
+    index: true,
   },
   createdOn: {
     type: Date,

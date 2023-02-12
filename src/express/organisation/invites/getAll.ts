@@ -45,10 +45,6 @@ router.get<"/getAll", {}, OrganisationInvitesGetAllRes, {}, Partial<Organisation
         organisation: organisationId,
       }).populate([
         {
-          path: "user",
-          select: "displayName createdOn",
-        },
-        {
           path: "organisation",
           select: "name createdOn",
         },

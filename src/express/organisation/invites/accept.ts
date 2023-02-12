@@ -36,7 +36,7 @@ router.post<"/accept", {}, OrganisationInvitesAcceptRes, Partial<OrganisationInv
 
       if (!invite) return notFoundError("No invite exists with that id")(res);
 
-      if (!invite.user._id.equals(req.user._id))
+      if (invite.email !== req.user.email)
         return forbiddenError("This invite is not addressed to you")(res);
 
       await invite.delete();
@@ -44,7 +44,7 @@ router.post<"/accept", {}, OrganisationInvitesAcceptRes, Partial<OrganisationInv
       await Organisation.findByIdAndUpdate(invite.organisation._id, {
         $push: {
           members: {
-            user: invite.user._id,
+            user: req.user._id,
           },
         },
       });

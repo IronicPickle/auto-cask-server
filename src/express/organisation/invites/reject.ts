@@ -10,48 +10,40 @@ import {
   validationError,
 } from "@shared/utils/api";
 import {
-  OrganisationInvitesDeleteReq,
-  OrganisationInvitesDeleteRes,
+  OrganisationInvitesRejectReq,
+  OrganisationInvitesRejectRes,
 } from "@shared/ts/api/organisation";
 import { OrganisationInvite } from "@mongoose/schemas/OrganisationInvite";
-import OrganisationPermissionCheckerBE from "@lib/utils/PermissionCheckerBE";
 
 const router = Router();
 
 router.delete<
-  "/delete",
+  "/reject",
   {},
-  OrganisationInvitesDeleteRes,
+  OrganisationInvitesRejectRes,
   {},
-  Partial<OrganisationInvitesDeleteReq>
->("/delete", async (req, res) => {
+  Partial<OrganisationInvitesRejectReq>
+>("/reject", async (req, res) => {
   try {
     if (!req.user) return unauthorizedError()(res);
 
     const { inviteId } = req.query;
 
-    const validators = organisationValidators.invitesDelete(req.query);
+    const validators = organisationValidators.invitesReject(req.query);
 
     let validation = parseValidators(validators);
     if (validation.failed || !inviteId) return validationError(validation)(res);
 
-    const invite = await OrganisationInvite.findById(inviteId).populate([
-      {
-        path: "organisation",
-        select: "name createdOn",
-      },
-    ]);
+    const invite = await OrganisationInvite.findById(inviteId);
 
     if (!invite) return notFoundError("No invite exists with that id")(res);
 
-    const permissionChecker = await OrganisationPermissionCheckerBE.from(invite.organisation.id);
-
-    if (!permissionChecker.canDeleteInvites(req.user.id))
-      return forbiddenError("You cannot delete invites in this organisation")(res);
+    if (invite.email !== req.user.email)
+      return forbiddenError("This invite is not addressed to you")(res);
 
     await invite.delete();
 
-    ok(invite)(res);
+    ok()(res);
   } catch (err) {
     console.error(err);
     error("Something went wrong.")(res);

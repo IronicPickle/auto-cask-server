@@ -7,8 +7,13 @@ export default class OrganisationPermissionCheckerBE extends OrganisationPermiss
       {
         organisation: organisationId,
       },
-      "role user",
-    );
+      "role",
+    ).populate([
+      {
+        path: "user",
+        select: "email",
+      },
+    ]);
 
     return new OrganisationPermissionChecker(members);
   }

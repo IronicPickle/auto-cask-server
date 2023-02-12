@@ -19,10 +19,12 @@ import organisationMembersUpdateRole from "./organisation/members/updateRole";
 import organisationInvitesCreate from "./organisation/invites/create";
 import organisationInvitesDelete from "./organisation/invites/delete";
 import organisationInvitesAccept from "./organisation/invites/accept";
+import organisationInvitesReject from "./organisation/invites/reject";
 import organisationInvitesGetAll from "./organisation/invites/getAll";
 import userGet from "./user/get";
 import userGetSelf from "./user/getSelf";
 import userGetMemberships from "./user/getMemberships";
+import userGetInvites from "./user/getInvites";
 
 export const expressServer = express();
 
@@ -101,9 +103,11 @@ export default () => {
   expressServer.use("/organisation/invites", organisationInvitesCreate);
   expressServer.use("/organisation/invites", organisationInvitesDelete);
   expressServer.use("/organisation/invites", organisationInvitesAccept);
+  expressServer.use("/organisation/invites", organisationInvitesReject);
   expressServer.use("/organisation/invites", organisationInvitesGetAll);
 
   expressServer.use("/user", userGet);
   expressServer.use("/user", userGetSelf);
   expressServer.use("/user", userGetMemberships);
+  expressServer.use("/user", userGetInvites);
 };
