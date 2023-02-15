@@ -3,6 +3,7 @@ import organisationValidators from "@shared/validators/organisationValidators";
 import { parseValidators } from "@shared/utils/generic";
 import {
   badRequestError,
+  conflictError,
   error,
   forbiddenError,
   notFoundError,
@@ -42,7 +43,7 @@ router.post<"/create", {}, OrganisationInvitesCreateRes, Partial<OrganisationInv
       });
 
       if (preExistingInvite)
-        return badRequestError("That user has already been invited to this organisation")(res);
+        return conflictError("That user has already been invited to this organisation")(res);
 
       const permissionChecker = await OrganisationPermissionCheckerBE.from(organisationId);
 
@@ -50,7 +51,7 @@ router.post<"/create", {}, OrganisationInvitesCreateRes, Partial<OrganisationInv
         return forbiddenError("You cannot create invites in this organisation")(res);
 
       if (permissionChecker.isMember(email))
-        return badRequestError("That user is already a member of this organisation")(res);
+        return conflictError("That user is already a member of this organisation")(res);
 
       const { _id } = await OrganisationInvite.create({
         organisation: organisationId,

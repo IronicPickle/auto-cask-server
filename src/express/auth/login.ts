@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { LoginReq, LoginRes } from "@shared/ts/api/auth";
 import authValidators from "@shared/validators/authValidators";
-import { parseValidators } from "@shared/utils/generic";
+import { escapeRegExp, parseValidators } from "@shared/utils/generic";
 import { error, ok, unauthorizedError, validationError } from "@shared/utils/api";
 import { compareSync } from "bcryptjs";
 import { User } from "@src/mongoose/schemas/User";
@@ -20,7 +20,9 @@ router.post<"/login", {}, LoginRes, Partial<LoginReq>>("/login", async (req, res
 
     const user = await User.findOne(
       {
-        email,
+        email: {
+          $regex: new RegExp(`^${escapeRegExp(email)}$`, "i"),
+        },
       },
       "password",
     );
