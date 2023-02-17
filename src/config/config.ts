@@ -6,6 +6,7 @@ import productionConfig from "./production.config";
 
 export interface Config {
   httpPort: number;
+  zmqPort: number;
   mongoUrl: string;
   sessionSecret?: string;
 }
