@@ -16,7 +16,7 @@ router.post<"/fingerprint", {}, PumpClientFingerprintRes, Partial<PumpClientFing
       const { mac, userId } = req.body;
 
       if (!(await checkIsAuthed(req, mac)))
-        return unauthorizedError("Access token missing or invalid")(res);
+        return unauthorizedError("Bearer token missing or invalid")(res);
 
       const validators = pumpClientValidators.fingerprint(req.body);
 
@@ -40,8 +40,13 @@ router.post<"/fingerprint", {}, PumpClientFingerprintRes, Partial<PumpClientFing
               fingerprintedUsers: userId,
             },
           },
-          { new: true },
-        );
+          { new: true, fields: "mac fingerprintedUsers createdOn" },
+        ).populate([
+          {
+            path: "fingerprintedUsers.user",
+            select: "displayName createdOn",
+          },
+        ]);
         return ok(updatedPumpClient)(res);
       }
 

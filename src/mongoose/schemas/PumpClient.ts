@@ -5,7 +5,7 @@ const schema = new Schema({
     type: String,
     required: true,
   },
-  accessToken: {
+  publicKey: {
     type: String,
     required: true,
   },

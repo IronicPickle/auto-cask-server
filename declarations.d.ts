@@ -11,6 +11,8 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       SESSION_SECRET?: string;
+      SECRET_KEY?: string;
+      PUBLIC_KEY?: string;
     }
   }
 

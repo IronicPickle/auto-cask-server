@@ -5,7 +5,7 @@ import { conflictError, error, ok, validationError } from "@shared/utils/api";
 import { PumpClientSetupReq, PumpClientSetupRes } from "@shared/ts/api/pumpClients";
 import { PumpClient } from "@mongoose/schemas/PumpClient";
 import { hashSync } from "bcryptjs";
-import crypto from "crypto";
+import { curveKeyPair } from "zeromq";
 
 const router = Router();
 
@@ -26,17 +26,21 @@ router.post<"/setup", {}, PumpClientSetupRes, Partial<PumpClientSetupReq>>(
       if (preExistingPumpClient)
         return conflictError("That mac address has already been setup.")(res);
 
-      const accessToken = crypto.randomUUID();
-      const hashedAccessToken = hashSync(accessToken, 10);
+      const { publicKey, secretKey } = curveKeyPair();
 
       const pumpClient = await PumpClient.create({
         mac,
-        accessToken: hashedAccessToken,
+        publicKey,
       });
 
-      pumpClient.accessToken = accessToken;
-
-      ok(pumpClient)(res);
+      ok({
+        _id: pumpClient.id,
+        mac: pumpClient.mac,
+        createdOn: pumpClient.createdOn,
+        publicKey,
+        secretKey,
+        serverPublicKey: process.env.PUBLIC_KEY,
+      })(res);
     } catch (err) {
       console.error(err);
       error("Something went wrong.")(res);

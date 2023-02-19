@@ -19,6 +19,8 @@ import { Organisation } from "@mongoose/schemas/Organisation";
 import OrganisationPermissionCheckerBE from "@lib/utils/PermissionCheckerBE";
 import { OrganisationPump } from "@mongoose/schemas/OrganisationPump";
 import { PumpClient } from "@mongoose/schemas/PumpClient";
+import { sockSend } from "@src/zmq/setupZmq";
+import { ZmqRequestType } from "@shared/enums/zmq";
 
 const router = Router();
 
@@ -85,6 +87,8 @@ router.post<"/create", {}, OrganisationPumpsCreateRes, Partial<OrganisationPumps
           select: "mac fingerprintedUsers createdOn",
         },
       ]);
+
+      await sockSend(pumpClient.publicKey, ZmqRequestType.PumpAssociated);
 
       ok(pump)(res);
     } catch (err) {

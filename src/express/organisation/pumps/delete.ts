@@ -15,6 +15,8 @@ import {
 } from "@shared/ts/api/organisation";
 import OrganisationPermissionCheckerBE from "@lib/utils/PermissionCheckerBE";
 import { OrganisationPump } from "@mongoose/schemas/OrganisationPump";
+import { sockSend } from "@src/zmq/setupZmq";
+import { ZmqRequestType } from "@shared/enums/zmq";
 
 const router = Router();
 
@@ -39,7 +41,7 @@ router.delete<"/delete", {}, OrganisationPumpsDeleteRes, {}, Partial<Organisatio
         },
         {
           path: "pumpClient",
-          select: "mac fingerprintedUsers createdOn",
+          select: "mac fingerprintedUsers createdOn publicKey",
         },
       ]);
 
@@ -51,6 +53,10 @@ router.delete<"/delete", {}, OrganisationPumpsDeleteRes, {}, Partial<Organisatio
         return forbiddenError("You cannot delete pumps in this organisation")(res);
 
       await pump.delete();
+
+      await sockSend((pump.pumpClient as any).publicKey, ZmqRequestType.PumpUnassociated);
+
+      delete (pump.pumpClient as any).publicKey;
 
       ok(pump)(res);
     } catch (err) {
