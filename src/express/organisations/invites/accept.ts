@@ -1,4 +1,3 @@
-import { Router } from "express";
 import organisationValidators from "@shared/validators/organisationValidators";
 import { parseValidators } from "@shared/utils/generic";
 import {
@@ -9,30 +8,32 @@ import {
   unauthorizedError,
   validationError,
 } from "@shared/utils/api";
-import {
-  OrganisationInvitesAcceptReq,
-  OrganisationInvitesAcceptRes,
-} from "@shared/ts/api/organisation";
+import { OrganisationsInvitesAccept } from "@shared/ts/api/organisations";
 import { Organisation } from "@mongoose/schemas/Organisation";
 import { OrganisationInvite } from "@mongoose/schemas/OrganisationInvite";
 import { OrganisationMember } from "@mongoose/schemas/OrganisationMember";
+import WrappedRouter from "@lib/utils/WrappedRouter";
 
-const router = Router();
+const router = new WrappedRouter();
 
-router.post<"/accept", {}, OrganisationInvitesAcceptRes, Partial<OrganisationInvitesAcceptReq>>(
-  "/accept",
+router.post<OrganisationsInvitesAccept>(
+  "/:organisationId/invites/:inviteId/accept",
   async (req, res) => {
     try {
       if (!req.user) return unauthorizedError()(res);
 
-      const { inviteId } = req.body;
+      const { organisationId, inviteId } = req.params;
 
-      const validators = organisationValidators.invitesAccept(req.body);
+      const validators = organisationValidators.invitesAccept(req.params);
 
       let validation = parseValidators(validators);
-      if (validation.failed || !inviteId) return validationError(validation)(res);
+      if (validation.failed || !inviteId || !organisationId)
+        return validationError(validation)(res);
 
-      const invite = await OrganisationInvite.findById(inviteId);
+      const invite = await OrganisationInvite.findOne({
+        _id: inviteId,
+        organisation: organisationId,
+      });
 
       if (!invite) return notFoundError("No invite exists with that id")(res);
 
@@ -62,4 +63,4 @@ router.post<"/accept", {}, OrganisationInvitesAcceptRes, Partial<OrganisationInv
   },
 );
 
-export default router;
+export default router.router;

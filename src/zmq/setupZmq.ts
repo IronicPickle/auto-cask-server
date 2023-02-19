@@ -5,7 +5,6 @@ import { getZmqRoutingId, zmqSerialise, zmqDeserialise } from "@shared/utils/zmq
 import z85 from "z85";
 import { envWrite } from "@lib/utils/env";
 import { ZmqRequestType } from "@shared/enums/zmq";
-import { checkIsAuthed } from "@express/pumpClient/shared";
 import { PumpClient } from "@mongoose/schemas/PumpClient";
 
 export const sock = new Router({

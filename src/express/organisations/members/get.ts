@@ -1,4 +1,3 @@
-import { Router } from "express";
 import organisationValidators from "@shared/validators/organisationValidators";
 import { parseValidators } from "@shared/utils/generic";
 import {
@@ -10,29 +9,21 @@ import {
   unauthorizedError,
   validationError,
 } from "@shared/utils/api";
-import {
-  OrganisationMembersRemoveReq,
-  OrganisationMembersRemoveRes,
-} from "@shared/ts/api/organisation";
+import { OrganisationsMembersGet } from "@shared/ts/api/organisations";
 import { Organisation } from "@mongoose/schemas/Organisation";
-import { OrganisationMember } from "@mongoose/schemas/OrganisationMember";
 import OrganisationPermissionCheckerBE from "@lib/utils/PermissionCheckerBE";
+import { OrganisationMember } from "@mongoose/schemas/OrganisationMember";
+import WrappedRouter from "@lib/utils/WrappedRouter";
 
-const router = Router();
+const router = new WrappedRouter();
 
-router.delete<
-  "/remove",
-  {},
-  OrganisationMembersRemoveRes,
-  {},
-  Partial<OrganisationMembersRemoveReq>
->("/remove", async (req, res) => {
+router.get<OrganisationsMembersGet>("/:organisationId/members/:userId", async (req, res) => {
   try {
     if (!req.user) return unauthorizedError()(res);
 
-    const { organisationId, userId } = req.query;
+    const { organisationId, userId } = req.params;
 
-    const validators = organisationValidators.membersRemove(req.query);
+    const validators = organisationValidators.membersGet(req.params);
 
     let validation = parseValidators(validators);
     if (validation.failed || !organisationId || !userId) return validationError(validation)(res);
@@ -41,10 +32,15 @@ router.delete<
 
     if (!organisation) return notFoundError("No organisation exists with that id")(res);
 
+    const permissionChecker = await OrganisationPermissionCheckerBE.from(organisationId);
+
+    if (!permissionChecker.canViewMembers(req.user.id))
+      return forbiddenError("You cannot view the members of this organisation")(res);
+
     const member = await OrganisationMember.findOne(
       {
-        user: userId,
         organisation: organisationId,
+        user: userId,
       },
       "organisation user role joinedOn",
     ).populate([
@@ -60,15 +56,6 @@ router.delete<
 
     if (!member) return badRequestError("That user is not a member of this organisation")(res);
 
-    if (req.user._id.equals(userId)) return badRequestError("You cannot remove yourself")(res);
-
-    const permissionChecker = await OrganisationPermissionCheckerBE.from(organisationId);
-
-    if (!permissionChecker.canRemoveMember(req.user.id, userId))
-      return forbiddenError("You cannot remove that member from this organisation")(res);
-
-    await member.delete();
-
     ok(member)(res);
   } catch (err) {
     console.error(err);
@@ -76,4 +63,4 @@ router.delete<
   }
 });
 
-export default router;
+export default router.router;

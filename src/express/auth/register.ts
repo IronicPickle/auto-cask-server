@@ -1,15 +1,15 @@
-import { Router } from "express";
-import { RegisterRes, RegisterReq } from "@shared/ts/api/auth";
+import { Register } from "@shared/ts/api/auth";
 import authValidators from "@shared/validators/authValidators";
 import { parseValidators } from "@shared/utils/generic";
 import { error, ok, validationError } from "@shared/utils/api";
 import { hashSync } from "bcryptjs";
 import { User } from "@src/mongoose/schemas/User";
 import { generateAccessToken } from "./shared";
+import WrappedRouter from "@lib/utils/WrappedRouter";
 
-const router = Router();
+const router = new WrappedRouter();
 
-router.post<"/register", {}, RegisterRes, Partial<RegisterReq>>("/register", async (req, res) => {
+router.post<Register>("/register", async (req, res) => {
   try {
     const { email, displayName, password } = req.body;
 
@@ -47,4 +47,4 @@ router.post<"/register", {}, RegisterRes, Partial<RegisterReq>>("/register", asy
   }
 });
 
-export default router;
+export default router.router;

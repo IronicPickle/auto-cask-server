@@ -1,15 +1,15 @@
-import { Router } from "express";
-import { LoginReq, LoginRes } from "@shared/ts/api/auth";
+import { Login } from "@shared/ts/api/auth";
 import authValidators from "@shared/validators/authValidators";
 import { escapeRegExp, parseValidators } from "@shared/utils/generic";
 import { error, ok, unauthorizedError, validationError } from "@shared/utils/api";
 import { compareSync } from "bcryptjs";
 import { User } from "@src/mongoose/schemas/User";
 import { generateAccessToken, generateRefreshToken } from "./shared";
+import WrappedRouter from "@lib/utils/WrappedRouter";
 
-const router = Router();
+const router = new WrappedRouter();
 
-router.post<"/login", {}, LoginRes, Partial<LoginReq>>("/login", async (req, res) => {
+router.post<Login>("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -48,4 +48,4 @@ router.post<"/login", {}, LoginRes, Partial<LoginReq>>("/login", async (req, res
   }
 });
 
-export default router;
+export default router.router;

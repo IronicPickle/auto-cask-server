@@ -1,5 +1,4 @@
-import { Router } from "express";
-import { RefreshReq, RefreshRes } from "@shared/ts/api/auth";
+import { Refresh } from "@shared/ts/api/auth";
 import { badRequestError, error, ok, validationError } from "@shared/utils/api";
 import authValidators from "@shared/validators/authValidators";
 import { isString, parseValidators } from "@shared/utils/generic";
@@ -8,10 +7,11 @@ import jwt from "jsonwebtoken";
 import config from "@config/config";
 import { User } from "@mongoose/schemas/User";
 import { GenericErrorCode } from "@shared/enums/api/generic";
+import WrappedRouter from "@lib/utils/WrappedRouter";
 
-const router = Router();
+const router = new WrappedRouter();
 
-router.post<"/refresh", {}, RefreshRes, Partial<RefreshReq>>("/refresh", async (req, res) => {
+router.post<Refresh>("/refresh", async (req, res) => {
   try {
     const { refreshToken } = req.body;
 
@@ -52,4 +52,4 @@ router.post<"/refresh", {}, RefreshRes, Partial<RefreshReq>>("/refresh", async (
   }
 });
 
-export default router;
+export default router.router;

@@ -1,17 +1,17 @@
-import { Router } from "express";
 import userValidators from "@shared/validators/userValidators";
 import { parseValidators } from "@shared/utils/generic";
 import { error, notFoundError, ok, validationError } from "@shared/utils/api";
-import { UserGetReq, UserGetRes } from "@shared/ts/api/user";
+import { UserGet } from "@shared/ts/api/users";
 import { User } from "@mongoose/schemas/User";
+import WrappedRouter from "@lib/utils/WrappedRouter";
 
-const router = Router();
+const router = new WrappedRouter();
 
-router.get<"/get", {}, UserGetRes, {}, Partial<UserGetReq>>("/get", async (req, res) => {
+router.get<UserGet>("/:userId", async (req, res) => {
   try {
-    const { userId } = req.query;
+    const { userId } = req.params;
 
-    const validators = userValidators.get(req.query);
+    const validators = userValidators.get(req.params);
 
     let validation = parseValidators(validators);
     if (validation.failed || !userId) return validationError(validation)(res);
@@ -27,4 +27,4 @@ router.get<"/get", {}, UserGetRes, {}, Partial<UserGetReq>>("/get", async (req, 
   }
 });
 
-export default router;
+export default router.router;

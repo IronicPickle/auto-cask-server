@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { config as loadEnv } from "dotenv";
 
 export const envWrite = (key: string, value: string) => {
   const envPath = path.join(__dirname, "../../../.env");
@@ -25,5 +24,5 @@ export const envWrite = (key: string, value: string) => {
     });
   }
 
-  loadEnv();
+  process.env[key] = value;
 };

@@ -10,32 +10,24 @@ import {
   unauthorizedError,
   validationError,
 } from "@shared/utils/api";
-import {
-  OrganisationMembersRoleUpdateReq,
-  OrganisationMembersRoleUpdateRes,
-} from "@shared/ts/api/organisation";
+import { OrganisationsMembersRemove } from "@shared/ts/api/organisations";
 import { Organisation } from "@mongoose/schemas/Organisation";
 import { OrganisationMember } from "@mongoose/schemas/OrganisationMember";
 import OrganisationPermissionCheckerBE from "@lib/utils/PermissionCheckerBE";
+import WrappedRouter from "@lib/utils/WrappedRouter";
 
-const router = Router();
+const router = new WrappedRouter();
 
-router.patch<
-  "/updateRole",
-  {},
-  OrganisationMembersRoleUpdateRes,
-  Partial<OrganisationMembersRoleUpdateReq>
->("/updateRole", async (req, res) => {
+router.delete<OrganisationsMembersRemove>("/:organisationId/members/:userId", async (req, res) => {
   try {
     if (!req.user) return unauthorizedError()(res);
 
-    const { organisationId, userId, role } = req.body;
+    const { organisationId, userId } = req.params;
 
-    const validators = organisationValidators.membersUpdateRole(req.body);
+    const validators = organisationValidators.membersRemove(req.params);
 
     let validation = parseValidators(validators);
-    if (validation.failed || !organisationId || !userId || !role)
-      return validationError(validation)(res);
+    if (validation.failed || !organisationId || !userId) return validationError(validation)(res);
 
     const organisation = await Organisation.findById(organisationId);
 
@@ -60,20 +52,14 @@ router.patch<
 
     if (!member) return badRequestError("That user is not a member of this organisation")(res);
 
+    if (req.user._id.equals(userId)) return badRequestError("You cannot remove yourself")(res);
+
     const permissionChecker = await OrganisationPermissionCheckerBE.from(organisationId);
 
-    if (!permissionChecker.canModifyRoles(req.user.id))
-      return forbiddenError("You cannot modify roles in this organisation")(res);
+    if (!permissionChecker.canRemoveMember(req.user.id, userId))
+      return forbiddenError("You cannot remove that member from this organisation")(res);
 
-    if (permissionChecker.hasRole(role, userId))
-      return badRequestError("That user already has that role")(res);
-
-    if (permissionChecker.isOwner(userId))
-      return badRequestError("An owner cannot have their role modified")(res);
-
-    member.set("role", role);
-
-    await member.save();
+    await member.delete();
 
     ok(member)(res);
   } catch (err) {
@@ -82,4 +68,4 @@ router.patch<
   }
 });
 
-export default router;
+export default router.router;
