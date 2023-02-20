@@ -26,7 +26,7 @@ router.patch<OrganisationsPumpsUpdate>("/:organisationId/pumps/:pumpId", async (
 
     const validation = parseValidators(validators);
 
-    if (validation.failed || !pumpId) return validationError(validation)(res);
+    if (validation.failed || !pumpId || !organisationId) return validationError(validation)(res);
 
     const pump = await OrganisationPump.findOne({
       _id: pumpId,
@@ -39,6 +39,10 @@ router.patch<OrganisationsPumpsUpdate>("/:organisationId/pumps/:pumpId", async (
       {
         path: "pumpClient",
         select: "mac fingerprintedUsers createdOn",
+      },
+      {
+        path: "badge",
+        select: "name breweryName createdBy createdOn",
       },
     ]);
 

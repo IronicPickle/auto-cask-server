@@ -42,6 +42,10 @@ router.delete<OrganisationsPumpsDelete>("/:organisationId/pumps/:pumpId", async 
         path: "pumpClient",
         select: "mac fingerprintedUsers createdOn publicKey",
       },
+      {
+        path: "badge",
+        select: "name breweryName createdBy createdOn",
+      },
     ]);
 
     if (!pump) return notFoundError("No pump exists with that id")(res);
@@ -55,7 +59,7 @@ router.delete<OrganisationsPumpsDelete>("/:organisationId/pumps/:pumpId", async 
 
     await sockSend((pump.pumpClient as any).publicKey, ZmqRequestType.PumpUnassociated);
 
-    delete (pump.pumpClient as any).publicKey;
+    (pump.pumpClient as any).publicKey = undefined;
 
     ok(pump)(res);
   } catch (err) {

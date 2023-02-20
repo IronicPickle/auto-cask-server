@@ -8,27 +8,40 @@ import { isString } from "@shared/utils/generic";
 import { User } from "@mongoose/schemas/User";
 import { ok } from "@shared/utils/api";
 import refresh from "./auth/refresh";
+
 import organisationsCreate from "./organisations/create";
 import organisationsUpdate from "./organisations/update";
 import organisationsDelete from "./organisations/delete";
 import organisationsGet from "./organisations/get";
 import organisationsLeave from "./organisations/leave";
+
 import organisationsMemberGetAll from "./organisations/members/getAll";
 import organisationsMemberGet from "./organisations/members/get";
 import organisationsMemberRemove from "./organisations/members/remove";
-import organisationsMemberUpdateRole from "./organisations/members/updateRole";
+import organisationsMemberUpdateRole from "./organisations/members/role/update";
+
 import organisationsInviteCreate from "./organisations/invites/create";
 import organisationsInviteDelete from "./organisations/invites/delete";
 import organisationsInviteAccept from "./organisations/invites/accept";
 import organisationsInviteReject from "./organisations/invites/reject";
 import organisationsInviteGetAll from "./organisations/invites/getAll";
+
 import organisationsPumpsGet from "./organisations/pumps/get";
 import organisationsPumpsGetAll from "./organisations/pumps/getAll";
 import organisationsPumpsCreate from "./organisations/pumps/create";
 import organisationsPumpsUpdate from "./organisations/pumps/update";
 import organisationsPumpsDelete from "./organisations/pumps/delete";
+import organisationsPumpsBadgeUpdate from "./organisations/pumps/badge/update";
+
 import pumpClientsSetup from "./pumpClients/setup";
 import pumpClientsFingerprint from "./pumpClients/fingerprint";
+
+import badgesGet from "./badges/get";
+import badgesGetAll from "./badges/getAll";
+import badgesCreate from "./badges/create";
+import badgesUpdate from "./badges/update";
+import badgesDelete from "./badges/delete";
+
 import usersGet from "./users/get";
 import usersGetSelf from "./users/getSelf";
 import usersGetMemberhips from "./users/getMemberships";
@@ -120,9 +133,16 @@ export default () => {
   expressServer.use("/organisations", organisationsPumpsCreate);
   expressServer.use("/organisations", organisationsPumpsUpdate);
   expressServer.use("/organisations", organisationsPumpsDelete);
+  expressServer.use("/organisations", organisationsPumpsBadgeUpdate);
 
   expressServer.use("/pumpClients", pumpClientsSetup);
   expressServer.use("/pumpClients", pumpClientsFingerprint);
+
+  expressServer.use("/badges", badgesGet);
+  expressServer.use("/badges", badgesGetAll);
+  expressServer.use("/badges", badgesCreate);
+  expressServer.use("/badges", badgesUpdate);
+  expressServer.use("/badges", badgesDelete);
 
   expressServer.use("/users", usersGetSelf);
   expressServer.use("/users", usersGetMemberhips);

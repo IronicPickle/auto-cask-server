@@ -39,6 +39,10 @@ router.get<OrganisationsPumpsGet>("/:organisationId/pumps/:pumpId", async (req, 
         path: "pumpClient",
         select: "mac fingerprintedUsers createdOn",
       },
+      {
+        path: "badge",
+        select: "name breweryName createdBy createdOn",
+      },
     ]);
 
     if (!pump) return notFoundError("No pump exists with that id")(res);

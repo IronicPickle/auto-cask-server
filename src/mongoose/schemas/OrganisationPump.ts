@@ -16,6 +16,11 @@ const schema = new Schema({
     required: true,
     index: true,
   },
+  badge: {
+    type: Schema.Types.ObjectId,
+    ref: "Badge",
+    required: false,
+  },
   createdOn: {
     type: Date,
     required: true,

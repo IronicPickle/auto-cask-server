@@ -1,4 +1,3 @@
-import { Router } from "express";
 import pumpClientValidators from "@shared/validators/pumpClientValidators";
 import { parseValidators } from "@shared/utils/generic";
 import { error, notFoundError, ok, unauthorizedError, validationError } from "@shared/utils/api";

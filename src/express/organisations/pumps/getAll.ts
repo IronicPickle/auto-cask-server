@@ -49,6 +49,10 @@ router.get<OrganisationsPumpsGetAll>("/:organisationId/pumps", async (req, res) 
         path: "pumpClient",
         select: "mac fingerprintedUsers createdOn",
       },
+      {
+        path: "badge",
+        select: "name breweryName createdBy createdOn",
+      },
     ]);
 
     ok(pumps)(res);
