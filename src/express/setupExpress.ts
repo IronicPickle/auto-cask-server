@@ -41,6 +41,7 @@ import badgesGetAll from "./badges/getAll";
 import badgesCreate from "./badges/create";
 import badgesUpdate from "./badges/update";
 import badgesDelete from "./badges/delete";
+import badgesImageUpdate from "./badges/image/update";
 
 import usersGet from "./users/get";
 import usersGetSelf from "./users/getSelf";
@@ -107,6 +108,8 @@ export default () => {
       next();
     });
 
+  expressServer.use(express.static("public"));
+
   expressServer.use("/auth", register);
   expressServer.use("/auth", login);
   expressServer.use("/auth", refresh);
@@ -143,6 +146,7 @@ export default () => {
   expressServer.use("/badges", badgesCreate);
   expressServer.use("/badges", badgesUpdate);
   expressServer.use("/badges", badgesDelete);
+  expressServer.use("/badges", badgesImageUpdate);
 
   expressServer.use("/users", usersGetSelf);
   expressServer.use("/users", usersGetMemberhips);
