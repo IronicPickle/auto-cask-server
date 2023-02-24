@@ -19,7 +19,7 @@ import Jimp from "jimp";
 
 const router = new WrappedRouter();
 
-router.patch<BadgesImageUpdate>("/:badgeId/image", async (req, res) => {
+router.put<BadgesImageUpdate>("/:badgeId/image", async (req, res) => {
   try {
     if (!req.user) return unauthorizedError()(res);
 

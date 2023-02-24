@@ -1,4 +1,4 @@
-import { isDev } from "@config/config";
+import config, { isDev } from "@config/config";
 import { isArray } from "@src/../../auto-cask-shared/utils/generic";
 import { Request } from "express";
 import formidable, { File } from "formidable";
