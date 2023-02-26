@@ -6,6 +6,7 @@ import z85 from "z85";
 import { envWrite } from "@lib/utils/env";
 import { ZmqRequestType } from "@shared/enums/zmq";
 import { PumpClient } from "@mongoose/schemas/PumpClient";
+import { OrganisationPump } from "@mongoose/schemas/OrganisationPump";
 
 export const sock = new Router({
   curveServer: true,
@@ -36,16 +37,6 @@ const setupZap = async () => {
     const mechanism = frames[5].toString();
     const publicKey = z85.encode(frames[6]);
 
-    console.log({
-      version,
-      requestId,
-      domain,
-      address,
-      identity,
-      mechanism,
-      publicKey,
-    });
-
     const shouldAccept = !!(await PumpClient.findOne({ publicKey }));
 
     sock.send([version, requestId, shouldAccept ? "200" : "400", "Test1", "Test2", ""]);
@@ -62,8 +53,6 @@ const setupRouter = async () => {
   await sock.bind(`tcp://*:${config.zmqPort}`);
   log("[ZMQ]", "Bound to to", config.zmqPort);
 
-  sock.events.on("connect", ({ address }) => log("[ZMQ]", address, "connected"));
-
   for await (const frames of sock) {
     try {
       const routingId = getZmqRoutingId(frames);
@@ -77,6 +66,26 @@ const setupRouter = async () => {
       log("[ZMQ]", type, data);
 
       switch (type) {
+        case ZmqRequestType.GetBadge: {
+          const pumpClient = await PumpClient.findOne({
+            publicKey: routingId,
+          });
+          if (!pumpClient) break;
+
+          const pump = await OrganisationPump.findOne({
+            pumpClient: pumpClient?._id,
+          }).populate([
+            {
+              path: "badge",
+              select: "name breweryName createdBy createdOn",
+            },
+          ]);
+          if (!pump) break;
+
+          sockSend(routingId, ZmqRequestType.BadgeData, pump.badge);
+
+          break;
+        }
       }
     } catch (err) {
       console.error(err);

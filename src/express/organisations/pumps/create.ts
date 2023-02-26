@@ -1,4 +1,3 @@
-import { Router } from "express";
 import organisationValidators from "@shared/validators/organisationValidators";
 import { parseValidators } from "@shared/utils/generic";
 import {

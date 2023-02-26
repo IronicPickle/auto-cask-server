@@ -11,6 +11,10 @@ import {
 } from "@shared/utils/api";
 import badgeValidators from "@shared/validators/badgeValidators";
 import { parseValidators } from "@shared/utils/generic";
+import { OrganisationPump } from "@mongoose/schemas/OrganisationPump";
+import { PumpClient } from "@mongoose/schemas/PumpClient";
+import { sockSend } from "@src/zmq/setupZmq";
+import { ZmqRequestType } from "@shared/enums/zmq";
 
 const router = new WrappedRouter();
 
@@ -46,6 +50,21 @@ router.patch<BadgesUpdate>("/:badgeId", async (req, res) => {
     await badge.save();
 
     ok(badge)(res);
+
+    const pumps = await OrganisationPump.find({
+      badge: badge._id,
+    });
+    const pumpClientIds = pumps.map(({ pumpClient }) => pumpClient._id);
+
+    const pumpClients = await PumpClient.find({
+      _id: {
+        $in: pumpClientIds,
+      },
+    });
+
+    for (const { publicKey } of pumpClients) {
+      sockSend(publicKey, ZmqRequestType.BadgeData, badge);
+    }
   } catch (err) {
     console.error(err);
     error("Something went wrong.")(res);

@@ -12,6 +12,8 @@ import { OrganisationsPumpsUpdate } from "@shared/ts/api/organisations";
 import OrganisationPermissionCheckerBE from "@lib/utils/PermissionCheckerBE";
 import { OrganisationPump } from "@mongoose/schemas/OrganisationPump";
 import WrappedRouter from "@lib/utils/WrappedRouter";
+import { sockSend } from "@src/zmq/setupZmq";
+import { ZmqRequestType } from "@src/../../auto-cask-shared/enums/zmq";
 
 const router = new WrappedRouter();
 
@@ -38,7 +40,7 @@ router.patch<OrganisationsPumpsUpdate>("/:organisationId/pumps/:pumpId", async (
       },
       {
         path: "pumpClient",
-        select: "mac fingerprintedUsers createdOn",
+        select: "mac fingerprintedUsers createdOn publicKey",
       },
       {
         path: "badge",
@@ -56,6 +58,10 @@ router.patch<OrganisationsPumpsUpdate>("/:organisationId/pumps/:pumpId", async (
     pump.set("name", name);
 
     await pump.save();
+
+    await sockSend((pump.pumpClient as any).publicKey, ZmqRequestType.BadgeData, pump.badge);
+
+    (pump.pumpClient as any).publicKey = undefined;
 
     ok(pump)(res);
   } catch (err) {

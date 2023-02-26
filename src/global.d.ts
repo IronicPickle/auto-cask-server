@@ -24,6 +24,4 @@ declare global {
   }
 }
 
-declare module "z85";
-
 export {};

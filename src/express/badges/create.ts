@@ -4,6 +4,9 @@ import { BadgesCreate } from "@shared/ts/api/badges";
 import { error, ok, unauthorizedError, validationError } from "@shared/utils/api";
 import badgeValidators from "@shared/validators/badgeValidators";
 import { parseValidators } from "@shared/utils/generic";
+import QRCode from "qrcode";
+import fs from "fs";
+import path from "path";
 
 const router = new WrappedRouter();
 
@@ -31,6 +34,17 @@ router.put<BadgesCreate>("/", async (req, res) => {
         select: "displayName createdOn",
       },
     ]);
+
+    if (!badge) throw new Error("Could not find newly-created badge");
+
+    const dirPath = `public/images/badges/${badge.id}`;
+    const qrcodePath = path.join(dirPath, "qrcode.jpg");
+
+    fs.mkdirSync(dirPath, {
+      recursive: true,
+    });
+
+    QRCode.toFile(qrcodePath, badge.id);
 
     ok(badge)(res);
   } catch (err) {

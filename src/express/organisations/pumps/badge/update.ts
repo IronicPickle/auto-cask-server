@@ -67,7 +67,7 @@ router.patch<OrganisationsPumpsBadgeUpdate>(
 
       await pump.save();
 
-      await sockSend((pump.pumpClient as any).publicKey, ZmqRequestType.BadgeChanged, badge);
+      await sockSend((pump.pumpClient as any).publicKey, ZmqRequestType.BadgeData, badge);
 
       (pump.pumpClient as any).publicKey = undefined;
 

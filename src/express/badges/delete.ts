@@ -11,6 +11,7 @@ import {
 } from "@shared/utils/api";
 import badgeValidators from "@shared/validators/badgeValidators";
 import { parseValidators } from "@shared/utils/generic";
+import fs from "fs";
 
 const router = new WrappedRouter();
 
@@ -39,6 +40,13 @@ router.delete<BadgesDelete>("/:badgeId", async (req, res) => {
       return forbiddenError("You are not the creator of this badge")(res);
 
     await badge.delete();
+
+    const dirPath = `public/images/badges/${badge.id}`;
+
+    fs.rmSync(dirPath, {
+      recursive: true,
+      force: true,
+    });
 
     ok(badge)(res);
   } catch (err) {
