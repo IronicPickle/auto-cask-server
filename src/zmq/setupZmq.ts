@@ -10,6 +10,7 @@ import { OrganisationPump } from "@mongoose/schemas/OrganisationPump";
 
 export const sock = new Router({
   curveServer: true,
+  handover: true,
 });
 
 export const sockSend = async (clientPublicKey: string, type: ZmqRequestType, data?: object) =>
@@ -49,6 +50,8 @@ const setupRouter = async () => {
   if (!PUBLIC_KEY || !SECRET_KEY) throw Error("Missing one or more ZMQ keys");
 
   sock.curveSecretKey = SECRET_KEY;
+
+  sock.events.on("accept", () => log("[ZMQ]", "Client connected"));
 
   await sock.bind(`tcp://*:${config.zmqPort}`);
   log("[ZMQ]", "Bound to to", config.zmqPort);
